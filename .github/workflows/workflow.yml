@@ -9,6 +9,8 @@ jobs:
     name: Upload release to PyPI
     runs-on: ubuntu-latest
 
+    environment: pypi
+
     permissions:
       id-token: write
 
@@ -30,5 +32,3 @@ jobs:
 
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        environment: pypi
