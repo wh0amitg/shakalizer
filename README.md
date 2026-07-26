@@ -42,7 +42,3 @@ deep_fry(
 print("Image successfully deep-fried!")
 
 ```
-
-```
-
-```
