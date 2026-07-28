@@ -22,7 +22,7 @@ pip install shakalizer
 
 The library includes two main features: **Deep Frying** (compression) and **Warping** (zhmykh).
 
-### 1. Deep Frying (Шакализация)
+### 1. Deep Frying
 
 Turn a crisp image into a compressed masterpiece using levels from 1 (light) to 10 (maximum pixelation):
 
@@ -33,7 +33,7 @@ deep_fry("input.jpg", "output.jpg", level=10)
 
 ```
 
-### 2. Warping (Жмых)
+### 2. Warping
 
 Twist, inflate, and distort the image space for that cursed liquify effect:
 
