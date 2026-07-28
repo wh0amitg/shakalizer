@@ -1,28 +1,40 @@
-from io import BytesIO
+import cv2
+import numpy as np
 from PIL import Image
 
-def deep_fry(
-    image_path: str,
-    output_path: str = None,
-    quality: int = 10,
-    scale: float = 0.5,
-) -> Image.Image:
+def deep_fry(input_path, output_path, level=5):
+    level = max(1, min(10, int(level)))
+    quality_map = {
+        1: 95, 2: 80, 3: 60, 4: 40, 5: 25,
+        6: 15, 7: 10, 8: 5, 9: 2, 10: 1
+    }
+    img = Image.open(input_path).convert("RGB")
+    img.save(output_path, "JPEG", quality=quality_map[level])
 
-  img = Image.open(image_path)
+def zhmykh(input_path, output_path, intensity=1.5):
+    img = cv2.imread(input_path)
+    if img is None:
+        raise ValueError("cant read pic for zhmykh")
 
-  if img.mode in ("RGBA", "P"):
-    img = img.convert("RGB")
+    rows, cols = img.shape[:2]
+    x, y = np.meshgrid(np.arange(cols), np.arange(rows))
 
-  new_width = int(img.width * scale)
-  new_height = int(img.height * scale)
-  img_resized = img.resize((new_width, new_height), Image.Resampling.NEAREST)
+    x_norm = 2.0 * x / cols - 1.0
+    y_norm = 2.0 * y / rows - 1.0
 
-  buffer = BytesIO()
-  img_resized.save(buffer, format="JPEG", quality=quality)
-  buffer.seek(0)
-  shakled_img = Image.open(buffer)
+    r = np.sqrt(x_norm**2 + y_norm**2)
+    theta = np.arctan2(y_norm, x_norm)
+    r_zhmykh = r ** (1.0 + (intensity * 0.5))
+    theta_zhmykh = theta + (r * intensity * 0.8)
+    wave_x = np.sin(y_norm * 10) * (0.05 * intensity)
+    wave_y = np.cos(x_norm * 10) * (0.05 * intensity)
 
-  if output_path:
-    shakled_img.save(output_path, "JPEG")
+    x_new = (r_zhmykh * np.cos(theta_zhmykh) + wave_x + 1.0) * cols / 2.0
+    y_new = (r_zhmykh * np.sin(theta_zhmykh) + wave_y + 1.0) * rows / 2.0
 
-  return shakled_img
+    map_x = np.float32(x_new)
+    map_y = np.float32(y_new)
+
+    zhmykh_img = cv2.remap(img, map_x, map_y, cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
+
+    cv2.imwrite(output_path, zhmykh_img)
